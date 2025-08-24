@@ -1,1 +1,1 @@
-# salary-acquittance-generator
+# Salary Acquittance Generator
