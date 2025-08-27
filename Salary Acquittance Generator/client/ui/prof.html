@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-light': '#3b82f6',
+                        'accent': '#fb923c', // Orange  
+                        'accent-dark': '#ea580c',
+                        'danger': '#dc2626', // Red
+                        'danger-light': '#ef4444',
+                        'bg-primary': '#f8fafc',
+                        'bg-secondary': '#f1f5f9',
+                        'text-primary': '#1e293b',
+                        'text-secondary': '#64748b',
+                        'border-color': '#e2e8f0'
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .gradient-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        }
+
+        .gradient-accent {
+            background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+        }
+
+        .gradient-danger {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+        }
+
+        .shadow-elegant {
+            box-shadow: 0 10px 30px -10px rgba(30, 58, 138, 0.3);
+        }
+
+        .transition-smooth {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.4);
+        }
+
+        .btn-accent {
+            background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-accent:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(251, 146, 60, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(251, 146, 60, 0.1);
+            border: 1px solid #fb923c;
+            color: #fb923c;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background: #fb923c;
+            color: white;
+        }
+
+        .card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+
+        .audit-log-item {
+            background: rgba(248, 250, 252, 0.8);
+            border-left: 3px solid #fb923c;
+            transition: all 0.2s ease;
+        }
+
+        .audit-log-item:hover {
+            background: rgba(241, 245, 249, 0.9);
+            transform: translateX(5px);
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        .dot-pattern {
+            background-image: radial-gradient(circle, #fb923c 1px, transparent 1px);
+            background-size: 20px 20px;
+            opacity: 0.05;
+        }
+
+        #auditTable td {
+            padding: 0.75rem 1rem;
+            /* py-3 px-4 */
+            border-bottom: 1px solid #e2e8f0;
+            /* Tailwind border-color */
+            color: #334155;
+            /* text-text-primary */
+            font-size: 0.875rem;
+            /* text-sm */
+        }
+
+        #auditTable th {
+            background-color: lightgrey;
+        }
+
+        #auditTable tr {
+            background-color: white;
+        }
+
+        #auditTable tr:hover td {
+            background-color: #f1f5f9;
+            /* bg-bg-secondary */
+            transition: background-color 0.2s ease;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col bg-bg-primary">
+    <div class="dot-pattern fixed inset-0 pointer-events-none"></div>
+
+    <!-- Header -->
+    <header class="gradient-primary shadow-elegant">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <h1 class="text-2xl font-bold text-white">
+                    Profile Page
+                </h1>
+
+                <div class="relative">
+                    <button id="profileToggle"
+                        class="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-smooth">
+                        <div class="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
+                            <span class="text-sm font-semibold" id="profileImage">A</span>
+                        </div>
+                        <span class="hidden md:inline font-medium" id="profileName"></span>
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
+
+                    <div id="profileMenu" class="hidden absolute right-0 mt-3 w-48 card z-50">
+                        <div class="py-2">
+                            <a href="" id="profileLink"
+                                class="flex items-center gap-3 px-4 py-3 text-sm text-text-primary hover:bg-bg-secondary transition-smooth">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zM4 20c0-4 4-6 8-6s8 2 8 6v1H4v-1z" />
+                                </svg>
+                                Profile
+                            </a>
+                            <hr class="my-1 border-border-color">
+                            <button id="logoutBtn"
+                                class="w-full text-left px-4 py-3 text-sm text-danger hover:bg-red-50 transition-smooth">
+                                🚪 Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-6xl mx-auto w-full p-6 relative z-10">
+        <!-- Two Column Layout -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            <!-- Left: Profile Info -->
+            <div class="card p-6 shadow-elegant min-h-[300px] flex flex-col justify-center">
+                <h2 class="text-xl font-semibold mb-6 text-text-primary flex items-center gap-2">
+                    <svg class="w-5 h-5 text-accent" viewBox="0 0 24 24" fill="none">
+                        <path
+                            d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zM4 20c0-4 4-6 8-6s8 2 8 6v1H4v-1z"
+                            fill="currentColor" />
+                    </svg>
+                    User Details
+                </h2>
+                <div class="space-y-4">
+                    <p class="text-text-primary"><strong class="text-accent">Name:</strong> <span id="name"
+                            class="ml-2">John Doe</span></p>
+                    <p class="text-text-primary"><strong class="text-accent">Username:</strong> <span id="username"
+                            class="ml-2">johndoe</span></p>
+                    <p class="text-text-primary"><strong class="text-accent">Role:</strong> <span id="role"
+                            class="ml-2 bg-accent/20 px-2 py-1 rounded-full text-accent text-sm">ADMIN</span></p>
+                </div>
+
+                <button type="button" id="changePasswordBtn" class="mt-6 btn-primary">
+                    Change Password
+                </button>
+
+                <form id="changePasswordForm" class="hidden mt-6 space-y-4">
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-text-primary mb-2">New
+                            Password</label>
+                        <input type="password" id="password" name="password" required class="input-field"
+                            placeholder="Enter new password">
+                    </div>
+                    <div>
+                        <label for="confirmPassword" class="block text-sm font-medium text-text-primary mb-2">Confirm
+                            Password</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" required class="input-field"
+                            placeholder="Confirm your password">
+                    </div>
+                    <div class="flex gap-3 pt-2">
+                        <button type="submit" class="btn-primary">
+                            Update Password
+                        </button>
+                        <button type="button" id="cancelPasswordBtn" class="btn-secondary">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Right: Audit Logs -->
+            <div class="overflow-y-auto max-h-[400px]" id="auditLogs">
+                <table id="auditTable" class="w-full table-auto text-sm text-left text-text-secondary">
+                    <thead class="sticky top-0 bg-white shadow-sm z-10">
+                        <tr>
+                            <th class="text-center py-3 px-4 font-semibold text-text-primary">Date</th>
+                            <th class="text-center py-3 px-4 font-semibold text-text-primary">Time</th>
+                            <th class="text-center py-3 px-4 font-semibold text-text-primary">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody id="auditBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        </div>
+        </div>
+    </main>
+
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 248, 240, 0.1);
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: hsl(var(--accent));
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: hsl(var(--secondary));
+        }
+    </style>
+
+
+    <script src="../scripts/lastScript.js"></script>
+</body>

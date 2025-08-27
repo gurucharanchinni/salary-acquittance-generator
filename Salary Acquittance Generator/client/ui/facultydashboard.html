@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-light': '#3b82f6',
+                        'accent': '#fb923c', // Orange  
+                        'accent-dark': '#ea580c',
+                        'danger': '#dc2626', // Red
+                        'danger-light': '#ef4444',
+                        'bg-primary': '#f8fafc',
+                        'bg-secondary': '#f1f5f9',
+                        'text-primary': '#1e293b',
+                        'text-secondary': '#64748b',
+                        'border-color': '#e2e8f0'
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .gradient-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        }
+
+        .gradient-accent {
+            background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+        }
+
+        .gradient-danger {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+        }
+
+        .tab-active {
+            color: #1e3a8a;
+            border-bottom: 2px solid #1e3a8a;
+        }
+
+        .table-hover:hover {
+            background-color: #f8fafc;
+        }
+
+        .shadow-elegant {
+            box-shadow: 0 10px 30px -10px rgba(30, 58, 138, 0.3);
+        }
+
+        .transition-smooth {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.4);
+        }
+
+        .btn-accent {
+            background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-accent:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(251, 146, 60, 0.4);
+        }
+
+        .card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+
+        .select-field {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .select-field:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .active {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="gradient-primary shadow-elegant">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <h1 class="text-2xl font-bold text-white">
+                    👥 Faculty Dashboard
+                </h1>
+
+                <div class="relative">
+                    <button id="profileToggle"
+                        class="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-smooth">
+                        <div class="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
+                            <span class="text-sm font-semibold" id="profileImage">A</span>
+                        </div>
+                        <span class="hidden md:inline font-medium" id="profileName">Admin</span>
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
+
+                    <div id="profileMenu" class="hidden absolute right-0 mt-3 w-48 card z-50">
+                        <div class="py-2">
+                            <a href="" id="profileLink"
+                                class="flex items-center gap-3 px-4 py-3 text-sm text-text-primary hover:bg-bg-secondary transition-smooth">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zM4 20c0-4 4-6 8-6s8 2 8 6v1H4v-1z" />
+                                </svg>
+                                Profile
+                            </a>
+                            <hr class="my-1 border-border-color">
+                            <button id="logoutBtn"
+                                class="w-full text-left px-4 py-3 text-sm text-danger hover:bg-red-50 transition-smooth">
+                                🚪 Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+
+    <!-- <nav class="bg-white border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex space-x-8">
+                <button onclick="showTab('payslips')" id="payslipsBtn"
+                    class="tab-button py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium">
+                    PaySlips
+                </button>
+            </div>
+        </div>
+    </nav> -->
+
+    <nav class="bg-white border-b border-border-color sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex space-x-8">
+                <button onclick="showTab('payslips')" id="analyticsTab"
+                    class="tab-button tab-active py-4 px-2 font-medium text-text-secondary hover:text-primary transition-smooth">
+                    📊 PaySlips
+                </button>
+            </div>
+        </div>
+    </nav>
+
+
+    <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div id="payslipsTab" class="tab-content active">
+            <div>
+                <!-- <input type="text" id="month" name="month"
+                    class="w-50 mb-5 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 username"
+                    placeholder="Enter month"> -->
+
+                <div class="w-full flex flex-col justify-start items-start gap-4">
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                        <div>
+                            <label class="block text-sm font-semibold text-text-primary mb-2">🗓️ Month</label>
+                            <select id="month" class="select-field">
+                                <option value="">Select Month</option>
+                                <option value="Jan">January</option>
+                                <option value="Feb">February</option>
+                                <option value="Mar">March</option>
+                                <option value="Apr">April</option>
+                                <option value="May">May</option>
+                                <option value="Jun">June</option>
+                                <option value="Jul">July</option>
+                                <option value="Aug">August</option>
+                                <option value="Sep">September</option>
+                                <option value="Oct">October</option>
+                                <option value="Nov">November</option>
+                                <option value="Dec">December</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-text-primary mb-2">📅 Year</label>
+                            <input type="number" id="year1" placeholder="Enter Year" class="input-field">
+                        </div>
+                        <div>
+                            <button id="monthWise" class="btn-primary w-full">Get
+                                PaySlip</button>
+                        </div>
+                    </div>
+                    <!-- <input type="number" id="year1" name="year1"
+                        class="w-50 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Enter Year"> -->
+                    <!-- <button type="button" id="monthWise"
+                        class="m-5 ml-0 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">Month
+                        Wise</button> -->
+                    <!-- <button onclick="generateDepartmentReport()" class="btn-primary w-full">
+                        Report</button> -->
+                </div>
+            </div>
+            <!--<div>
+                 <div id="paysliptable" class="">
+                    <div class="overflow-x-auto">
+                        <table class=" min-w-full divide-y divide-gray-200" id="payTable">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th
+                                        class="text-center px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        Start Date
+                                    </th>
+                                    <th
+                                        class="text-center px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        End Date
+                                    </th>
+                                    <th
+                                        class=" text-center px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="paySalaryTbody" class="bg-white divide-y divide-gray-200">
+                </tbody>
+                </table>
+            </div>
+        </div> -->
+
+            <div id="paysliptable" class="mt-8 card overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full" id="payTable">
+                        <thead class="bg-bg-secondary">
+                            <tr>
+                                <th
+                                    class="text-center px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                    Start Date</th>
+                                <th
+                                    class="text-center px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                    End Date</th>
+                                <th
+                                    class="text-center px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                    Actions</th>
+
+                        <tbody id="paySalaryTbody" class="bg-white divide-y divide-border-color">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- <button onclick="downloadPDF()"
+                class="m-5 ml-0 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-200">
+                Download PDF
+            </button> -->
+        </div>
+    </main>
+
+    <script src="../scripts/facultyScript.js"></script>
+    <script src="../scripts/lastScript.js"></script>
+</body>
+
+</html>

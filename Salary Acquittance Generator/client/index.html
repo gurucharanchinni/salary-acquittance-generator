@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salary Acquittance Generator - Login</title>
+    <meta name="description" content="Faculty Payroll Management System Login" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-light': '#3b82f6',
+                        'accent': '#fb923c', // Orange
+                        'accent-dark': '#ea580c',
+                        'danger': '#dc2626', // Red
+                        'danger-light': '#ef4444',
+                        'bg-primary': '#f8fafc',
+                        'bg-secondary': '#f1f5f9',
+                        'text-primary': '#1e293b',
+                        'text-secondary': '#64748b',
+                        'border-color': '#e2e8f0',
+                        'foreground': '#1e293b',
+                        'muted-foreground': '#64748b',
+                        'background': '#f8fafc',
+                        'border-input': '#e2e8f0',
+                        'primary': '#1e3a8a',
+                        'white': '#ffffff'
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .gradient-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        }
+
+        .gradient-accent {
+            background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+        }
+
+        .gradient-danger {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+        }
+
+        .shadow-elegant {
+            box-shadow: 0 10px 30px -10px rgba(30, 58, 138, 0.3);
+        }
+
+        .transition-smooth {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.4);
+        }
+
+        .btn-accent {
+            background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-accent:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(251, 146, 60, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(251, 146, 60, 0.1);
+            border: 1px solid #fb923c;
+            color: #fb923c;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background: #fb923c;
+            color: white;
+        }
+
+        .card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+
+        .audit-log-item {
+            background: rgba(248, 250, 252, 0.8);
+            border-left: 3px solid #fb923c;
+            transition: all 0.2s ease;
+        }
+
+        .audit-log-item:hover {
+            background: rgba(241, 245, 249, 0.9);
+            transform: translateX(5px);
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+
+        /* Added Styles to Fix Missing Classes */
+        .dot-pattern {
+            background-image: radial-gradient(circle, #fb923c 1px, transparent 1px);
+            background-size: 20px 20px;
+            opacity: 0.05;
+        }
+
+        .shadow-custom-lg {
+            box-shadow: 0 1rem 3rem -0.5rem rgba(30, 58, 138, 0.3);
+        }
+
+        .shadow-custom-xl {
+            box-shadow: 0 1.5rem 4rem -0.5rem rgba(30, 58, 138, 0.4);
+        }
+
+        .shadow-custom-sm {
+            box-shadow: 0 0.5rem 1rem -0.2rem rgba(30, 58, 138, 0.2);
+        }
+
+        .bg-gradient-subtle {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+
+
+        .bg-muted {
+            background-color: #f1f5f9;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-subtle min-h-screen">
+    <div class="absolute inset-0 pattern-dots opacity-40"></div>
+
+    <div class="relative min-h-screen flex items-center justify-center p-4" id="tabs">
+        <div class="w-full max-w-md">
+            <div class="text-center mb-8">
+                <div
+                    class="inline-flex items-center justify-center w-16 h-16 bg-gradient-primary rounded-full mb-4 shadow-custom-lg">
+                    <svg class="w-8 h-8 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z">
+                        </path>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold text-text-primary mb-2">
+                    Salary Acquittance Generator
+                </h1>
+                <p class="text-text-secondary">
+                    Faculty Payroll Management System
+                </p>
+            </div>
+
+            <div class="bg-white/95 backdrop-blur-sm rounded-lg shadow-custom-xl border border-border-color"
+                id="loginRegisterCard">
+                <div class="p-6 pb-4">
+                    <div class="flex space-x-1 bg-muted rounded-lg p-1">
+                        <button onclick="showTab('login')"
+                            class="tab-button flex-1 py-2 px-3 text-sm font-medium rounded-md transition-all duration-200 bg-primary text-white shadow-custom-sm"
+                            id="loginBtn">
+                            <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                                </path>
+                            </svg>
+                            Login
+                        </button>
+                        <button onclick="showTab('register')"
+                            class="tab-button flex-1 py-2 px-3 text-sm font-medium rounded-md transition-all duration-200 text-muted-foreground hover:text-foreground"
+                            id="registerBtn">
+                            <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                                </path>
+                            </svg>
+                            Register
+                        </button>
+                    </div>
+                </div>
+
+                <div class="px-6 pb-6">
+                    <div id="loginTab" class="tab-content space-y-4">
+                        <div class="text-center mb-6">
+                            <h2 class="text-xl font-semibold text-foreground mb-2">Welcome Back</h2>
+                            <p class="text-muted-foreground">Enter your credentials to access the system</p>
+                        </div>
+
+                        <form class="space-y-4" id="loginForm">
+                            <div class="space-y-2">
+                                <label for="username" class="block text-sm font-medium text-foreground">Username</label>
+                                <input type="text" id="username" name="username" placeholder="Enter your username"
+                                    class="input-field w-full px-3 py-2 border border-input rounded-md bg-background focus:outline-none"
+                                    required />
+                            </div>
+
+                            <div class="space-y-2">
+                                <label for="password" class="block text-sm font-medium text-foreground">Password</label>
+                                <input type="password" id="password" name="password" placeholder="Enter your password"
+                                    class="input-field w-full px-3 py-2 border border-input rounded-md bg-background focus:outline-none"
+                                    required />
+                            </div>
+
+                            <button type="submit"
+                                class="btn-primary w-full text-white font-medium py-2.5 px-4 rounded-md shadow-custom-md">
+                                <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                                    </path>
+                                </svg>
+                                Sign In
+                            </button>
+
+                            <div class="text-center">
+                                <button class="text-sm text-primary hover:text-primary-hover font-medium"
+                                    id="forgotPasswordBtn">
+                                    Forgot your password?
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="registerTab" class="tab-content space-y-4 hidden">
+                        <div class="text-center mb-6">
+                            <h2 class="text-xl font-semibold text-foreground mb-2">Create Account</h2>
+                            <p class="text-muted-foreground">Register for access to the payroll system</p>
+                        </div>
+
+                        <form class="space-y-4" id="registerForm">
+                            <div class="space-y-2">
+                                <label for="name" class="block text-sm font-medium text-foreground">Full
+                                    Name</label>
+                                <input type="text" id="name" name="fullName" placeholder="Enter your full name"
+                                    class="input-field w-full px-3 py-2 border border-input rounded-md bg-background focus:outline-none"
+                                    required />
+                            </div>
+
+                            <div class="space-y-2">
+                                <label for="registerUsername"
+                                    class="block text-sm font-medium text-foreground">Username</label>
+                                <input type="text" id="registerUsername" name="registerUsername"
+                                    placeholder="Choose a username"
+                                    class="input-field w-full px-3 py-2 border border-input rounded-md bg-background focus:outline-none"
+                                    required />
+                            </div>
+
+                            <div class="space-y-2">
+                                <label for="email" class="block text-sm font-medium text-foreground">Email</label>
+                                <input type="email" id="email" name="email" placeholder="Enter your email"
+                                    class="input-field w-full px-3 py-2 border border-input rounded-md bg-background focus:outline-none"
+                                    required />
+                            </div>
+
+                            <div class="space-y-2">
+                                <label for="registerPassword"
+                                    class="block text-sm font-medium text-foreground">Password</label>
+                                <input type="password" id="registerPassword" name="registerPassword"
+                                    placeholder="Create a password"
+                                    class="input-field w-full px-3 py-2 border border-input rounded-md bg-background focus:outline-none"
+                                    required />
+                            </div>
+
+                            <div class="space-y-2">
+                                <label for="confirmPassword" class="block text-sm font-medium text-foreground">Confirm
+                                    Password</label>
+                                <input type="password" id="confirmPassword" name="confirmPassword"
+                                    placeholder="Confirm your password"
+                                    class="input-field w-full px-3 py-2 border border-input rounded-md bg-background focus:outline-none"
+                                    required />
+                            </div>
+
+                            <div class="space-y-2">
+                                <label for="role" class="block text-sm font-medium text-foreground">Role</label>
+                                <select id="dropdownSelect" name="role"
+                                    class="input-field w-full px-3 py-2 border border-input rounded-md bg-background focus:outline-none"
+                                    required>
+                                    <option value="">Select your role</option>
+                                    <option value="ADMIN">
+                                        🏢 ADMIN
+                                    </option>
+                                    <option value="FACULTY">
+                                        👥 FACULTY
+                                    </option>
+                                    <option value="HR">
+                                        🛡️ HR
+                                    </option>
+                                    <option value="ACCOUNTS">
+                                        🧮 ACCOUNTS
+                                    </option>
+                                </select>
+                            </div>
+
+                            <button type="submit"
+                                class="btn-primary w-full text-white font-medium py-2.5 px-4 rounded-md shadow-custom-md">
+                                <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                                    </path>
+                                </svg>
+                                Create Account
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div id="forgotPasswordTab" class="tab-content space-y-4 hidden">
+                <div class="text-center mb-6">
+                    <h2 class="text-xl font-semibold text-foreground mb-2">Forgot Password </h2>
+                </div>
+
+                <form class="space-y-4" id="forgotTab">
+
+                    <div class="space-y-2">
+                        <label for="forgotUsername" class="block text-sm font-medium text-foreground">Username</label>
+                        <input type="text" id="forgotUsername" name="forgotUsername" placeholder="Choose a username"
+                            class="input-field w-full px-3 py-2 border border-input rounded-md bg-background focus:outline-none"
+                            required />
+                    </div>
+
+
+                    <div class="space-y-2">
+                        <label for="forgotPassword" class="block text-sm font-medium text-foreground">Password</label>
+                        <input type="password" id="forgotPassword" name="forgotPassword" placeholder="Create a password"
+                            class="input-field w-full px-3 py-2 border border-input rounded-md bg-background focus:outline-none"
+                            required />
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="confirmPassword1" class="block text-sm font-medium text-foreground">Confirm
+                            Password</label>
+                        <input type="password" id="confirmPassword1" name="confirmPassword1"
+                            placeholder="Confirm your password"
+                            class="input-field w-full px-3 py-2 border border-input rounded-md bg-background focus:outline-none"
+                            required />
+                    </div>
+
+                    <button type="submit" id="ResetPassword"
+                        class="btn-primary w-full text-white font-medium py-2.5 px-4 rounded-md shadow-custom-md">
+                        <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                            </path>
+                        </svg>
+                        Reset Password
+                    </button>
+                </form>
+            </div>
+
+            <div class="text-center mt-6">
+                <p class="text-sm text-muted-foreground">
+                    © 2025 Salary Acquittance System. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </div>
+    <script>
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll(".tab-content");
+            const buttons = document.querySelectorAll(".tab-button");
+
+            // Hide all tabs
+            tabs.forEach((tab) => tab.classList.add("hidden"));
+
+            // Reset all button styles
+            buttons.forEach((btn) => {
+                btn.classList.remove("bg-primary", "text-white", "shadow-custom-sm");
+                btn.classList.add("text-muted-foreground", "hover:text-foreground");
+            });
+
+            // Show selected tab
+            const selectedTab = document.getElementById(tabName + "Tab");
+            if (selectedTab) {
+                selectedTab.classList.remove("hidden");
+            }
+
+            // Style selected button
+            const selectedButton = tabName === 'login' ?
+                document.getElementById('loginBtn') :
+                document.getElementById('registerBtn');
+
+            if (selectedButton) {
+                selectedButton.classList.remove("text-muted-foreground", "hover:text-foreground");
+                selectedButton.classList.add("bg-primary", "text-white", "shadow-custom-sm");
+            }
+        }
+    </script>
+    <script src="../scripts/lastScript.js"></script>
+</body>
+
+</html>

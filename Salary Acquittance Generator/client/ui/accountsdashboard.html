@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Dashboard - Salary Acquittance Generator</title>
+    <meta name="description" content="Faculty dashboard for payroll management and payslip generation" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-light': '#3b82f6',
+                        'accent': '#fb923c', // Orange  
+                        'accent-dark': '#ea580c',
+                        'danger': '#dc2626', // Red
+                        'danger-light': '#ef4444',
+                        'bg-primary': '#f8fafc',
+                        'bg-secondary': '#f1f5f9',
+                        'text-primary': '#1e293b',
+                        'text-secondary': '#64748b',
+                        'border-color': '#e2e8f0'
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .gradient-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        }
+
+        .gradient-accent {
+            background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+        }
+
+        .gradient-danger {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+        }
+
+        .tab-active {
+            color: #1e3a8a;
+            border-bottom: 2px solid #1e3a8a;
+        }
+
+        .table-hover:hover {
+            background-color: #f8fafc;
+        }
+
+        .shadow-elegant {
+            box-shadow: 0 10px 30px -10px rgba(30, 58, 138, 0.3);
+        }
+
+        .transition-smooth {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.4);
+        }
+
+        .btn-accent {
+            background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-accent:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(251, 146, 60, 0.4);
+        }
+
+        .card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+
+        .select-field {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .select-field:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .active {
+            display: block;
+        }
+    </style>
+</head>
+
+<body class="bg-dashboard-bg min-h-screen">
+    <!-- Header -->
+    <header class="gradient-primary shadow-elegant">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <h1 class="text-2xl font-bold text-white">
+                    🧮 Accounts Dashboard
+                </h1>
+
+                <div class="relative">
+                    <button id="profileToggle"
+                        class="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-smooth">
+                        <div class="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
+                            <span class="text-sm font-semibold" id="profileImage">A</span>
+                        </div>
+                        <span class="hidden md:inline font-medium" id="profileName"></span>
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
+
+                    <div id="profileMenu" class="hidden absolute right-0 mt-3 w-48 card z-50">
+                        <div class="py-2">
+                            <a href="" id="profileLink"
+                                class="flex items-center gap-3 px-4 py-3 text-sm text-text-primary hover:bg-bg-secondary transition-smooth">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zM4 20c0-4 4-6 8-6s8 2 8 6v1H4v-1z" />
+                                </svg>
+                                Profile
+                            </a>
+                            <hr class="my-1 border-border-color">
+                            <button id="logoutBtn"
+                                class="w-full text-left px-4 py-3 text-sm text-danger hover:bg-red-50 transition-smooth">
+                                🚪 Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-border-color sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex space-x-8">
+                <button
+                    class="tab-button py-4 px-2 font-medium text-text-secondary hover:text-primary transition-smooth">
+                    PaySlip
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-lg shadow-sm border border-border">
+            <div class="px-6 py-4 border-b border-border">
+                <h2 class="text-lg font-semibold text-gray-900">Payslip Generator</h2>
+                <p class="text-sm text-gray-600 mt-1">Generate and download payslips for faculty members</p>
+            </div>
+
+            <div class="p-6">
+                <!-- Month/Year Selection -->
+                <div class=" flex flex-wrap gap-4 items-end mb-6">
+                    <form action="" id="salaryCalculatorForm">
+                        <input type="date" name="startDate" id="startDate">
+                        <input type="date" name="endDate" id="endDate">
+                        <button id="calcSalary"
+                            class="btn-primary text-primary-foreground px-6 py-2 rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors font-medium">
+                            Generate Payslips
+                        </button>
+                    </form>
+                </div>
+
+                <!-- <div id="salaryComponentRulesTab" class="tab-content">
+                    <div class="bg-white rounded-lg shadow">
+                        <div id="calculatorTab" class="tab-content ">
+                            <div class="bg-white rounded-lg shadow">
+                                <div class="px-6 py-4 border-b border-gray-200">
+                                    <h2 class="text-lg font-medium text-gray-900">Salary Calculator</h2>
+                                </div>
+                                <div class="p-6">
+                                    <form id="salaryCalculatorForm" class="flex flex-wrap gap-4 items-end mb-6">
+                                        <input type="date" name="startDate" id="startDate">
+                                        <input type="date" name="endDate" id="endDate">
+                                        <button type="submit" id="calcSalary"
+                                            class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition duration-200">
+                                            Calculate Salary
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div> -->
+                <!-- Results Table -->
+                <div id="calculateSalary" class="hidden">
+                    <div class="overflow-x-auto">
+                        <table id="calcTable" class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Employee ID</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Name</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Basic Pay</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        HRA</th>
+
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        TA</th>
+
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        DA</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Gross Salary</th>
+
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        PF</th>
+
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        ESI</th>
+
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        IT</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Net Salary</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Start Date</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        End Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="calcSalaryBody" class="bg-white divide-y divide-gray-200">
+                                <!-- Dynamic content will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- <div class="mt-4 flex gap-2">
+                        <button onclick="downloadPDF()"
+                            class="bg-accent text-white px-4 py-2 rounded-md hover:bg-accent/90 transition-colors">
+                            Download PDF
+                        </button>
+                        <button onclick="downloadExcel()"
+                            class="bg-secondary text-white px-4 py-2 rounded-md hover:bg-secondary/90 transition-colors">
+                            Export to Excel
+                        </button>
+                    </div> -->
+                </div>
+
+                <!-- Loading State -->
+                <div id="loadingState" class="hidden text-center py-8">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    <p class="mt-2 text-gray-600">Generating payslips...</p>
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="text-center py-12 text-gray-500">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <p class="mt-2">Select month and year to generate payslips</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Currency formatter
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+
+        // Set current year as default
+    </script>
+    <script src="../scripts/lastScript.js"></script>
+    <script src="../scripts/accountsScript.js"></script>
+</body>

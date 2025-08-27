@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salary Management Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-light': '#3b82f6',
+                        'accent': '#fb923c', // Orange  
+                        'accent-dark': '#ea580c',
+                        'danger': '#dc2626', // Red
+                        'danger-light': '#ef4444',
+                        'bg-primary': '#f8fafc',
+                        'bg-secondary': '#f1f5f9',
+                        'text-primary': '#1e293b',
+                        'text-secondary': '#64748b',
+                        'border-color': '#e2e8f0'
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Overlay background */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        /* Hide when not active */
+        .hidden {
+            display: none;
+        }
+
+        /* Modal box */
+        .modal-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            height: 90%;
+            max-width: 90%;
+            animation: fadeIn 0.3s ease-in-out;
+            overflow: auto;
+        }
+
+        /* Close button (top right) */
+        .close-btn {
+            float: right;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #333;
+        }
+
+        .close-btn:hover {
+            color: #ff0000;
+        }
+
+
+        .modal-enter {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .gradient-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        }
+
+        .gradient-accent {
+            background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+        }
+
+        .gradient-danger {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+        }
+
+        .tab-active {
+            color: #1e3a8a;
+            border-bottom: 2px solid #1e3a8a;
+        }
+
+        .table-hover:hover {
+            background-color: #f8fafc;
+        }
+
+        .shadow-elegant {
+            box-shadow: 0 10px 30px -10px rgba(30, 58, 138, 0.3);
+        }
+
+        .transition-smooth {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.4);
+        }
+
+        .btn-accent {
+            background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-accent:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(251, 146, 60, 0.4);
+        }
+
+        .card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .input-field {
+            width: 80%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+
+        .select-field {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .select-field:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .active {
+            display: block;
+        }
+
+        .chart-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+
+
+        .chart-item {
+            flex: 1 1 25%;
+            max-width: 500px;
+            text-align: center;
+            /* centers title and canvas */
+        }
+    </style>
+</head>
+
+<body class="bg-bg-primary min-h-screen font-sans">
+    <!-- Header -->
+    <header class="gradient-primary shadow-elegant">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <h1 class="text-2xl font-bold text-white">
+                    🏢 Admin Dashboard
+                </h1>
+
+                <div class="relative">
+                    <button id="profileToggle"
+                        class="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-smooth">
+                        <div class="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
+                            <span class="text-sm font-semibold" id="profileImage">A</span>
+                        </div>
+                        <span class="hidden md:inline font-medium" id="profileName"></span>
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
+
+                    <div id="profileMenu" class="hidden absolute right-0 mt-3 w-48 card z-50">
+                        <div class="py-2">
+                            <a href="" id="profileLink"
+                                class="flex items-center gap-3 px-4 py-3 text-sm text-text-primary hover:bg-bg-secondary transition-smooth">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zM4 20c0-4 4-6 8-6s8 2 8 6v1H4v-1z" />
+                                </svg>
+                                Profile
+                            </a>
+                            <hr class="my-1 border-border-color">
+                            <button id="logoutBtn"
+                                class="w-full text-left px-4 py-3 text-sm text-danger hover:bg-red-50 transition-smooth">
+                                🚪 Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="bg-white border-b border-border-color sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex space-x-8">
+                <button onclick="showTab('analytics')" id="analyticsBtn"
+                    class="tab-button tab-active py-4 px-2 font-medium text-text-secondary hover:text-primary transition-smooth">
+                    📊 Analytics
+                </button>
+                <button onclick="showTab('paySlipApproval')" id="paySlip"
+                    class="tab-button py-4 px-2 font-medium text-text-secondary hover:text-primary transition-smooth">
+                    ✅ Pay Slip Approval
+                </button>
+                <button onclick="showTab('staff')" id="staffBtn"
+                    class="tab-button py-4 px-2 font-medium text-text-secondary hover:text-primary transition-smooth">
+                    👥 Staff Management
+                </button>
+                <button onclick="showTab('salaryComponentRules')" id="salaryComponentRules"
+                    class="tab-button py-4 px-2 font-medium text-text-secondary hover:text-primary transition-smooth">
+                    ⚙️ Salary Rules
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+
+        <!-- Analytics Tab -->
+        <div id="analyticsTab" class="tab-content active">
+            <div class="card p-8 mb-8">
+                <h2 class="text-2xl font-bold text-primary mb-6">📈 Analytics & Reporting</h2>
+
+                <!-- Filters Section -->
+                <div class="space-y-6">
+                    <!-- Year Filter -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        <div>
+                            <label class="block text-sm font-semibold text-text-primary mb-2">📅 Year</label>
+                            <input type="number" id="year" placeholder="Enter Year (e.g., 2024)" class="input-field">
+                        </div>
+                        <div>
+                            <button id="yearWise" class="btn-primary w-50">Generate Year
+                                Report</button>
+                        </div>
+                    </div>
+
+                    <!-- Month Filter -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                        <div>
+                            <label class="block text-sm font-semibold text-text-primary mb-2">🗓️ Month</label>
+                            <select id="month" class="select-field">
+                                <option value="">Select Month</option>
+                                <option value="Jan">January</option>
+                                <option value="Feb">February</option>
+                                <option value="Mar">March</option>
+                                <option value="Apr">April</option>
+                                <option value="May">May</option>
+                                <option value="Jun">June</option>
+                                <option value="Jul">July</option>
+                                <option value="Aug">August</option>
+                                <option value="Sep">September</option>
+                                <option value="Oct">October</option>
+                                <option value="Nov">November</option>
+                                <option value="Dec">December</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-text-primary mb-2">📅 Year</label>
+                            <input type="number" id="year1" placeholder="Enter Year" class="input-field">
+                        </div>
+                        <div>
+                            <button id="monthWise" class="btn-primary w-50">Generate Month
+                                Report</button>
+                        </div>
+                    </div>
+
+                    <!-- Department Filter -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        <div>
+                            <label class="block text-sm font-semibold text-text-primary mb-2">🏢 Department</label>
+                            <select id="department" class="select-field">
+                                <option value="">Select Department</option>
+                                <option value="CSE">Computer Science Engineering</option>
+                                <option value="ECE">Electronics & Communication</option>
+                                <option value="MECH">Mechanical Engineering</option>
+                                <option value="CIV">Civil Engineering</option>
+                                <option value="EEE">Electrical & Electronics</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button id="departmentWise" onclick="departmentWiseFilter()"
+                                class="btn-primary w-50">Generate Department
+                                Report</button>
+                        </div>
+                    </div>
+
+                    <!-- Export Buttons -->
+                </div>
+                <div class="flex justify-start items-end m-6 gap-7">
+
+                    <div class="flex justify-start items-center m-6 gap-7">
+                        <div class="bg-accent text-white px-4 py-2 rounded-full text-sm font-semibold" id="nostaff">
+                            No of Staff:
+                        </div>
+                        <div class="bg-accent text-white px-4 py-2 rounded-full text-sm font-semibold"
+                            id="totalnetsalary">
+                            Total Net Salary:
+                        </div>
+                        <button id="analyticsModalBtn" class="btn-accent" onclick="openAnalyticsModal()">
+                            View Analytics
+                        </button>
+                        <button id="pdfExport" class="btn-accent">
+                            📄 Export PDF
+                        </button>
+                        <button id="excelExport" class="btn-accent">
+                            📊 Export Excel
+                        </button>
+                    </div>
+
+                    <div id="analyticsModal" class="modal hidden">
+                        <div class="modal-content">
+                            <span class="close-btn" onclick="closeAnalyticsModal()">&times;</span>
+                            <h2 class="mb-10">Analytics Dashboard</h2>
+                            <div class="chart-row">
+                                <div class="chart-item">
+                                    <h3>Department Wise Expenditure</h3>
+                                    <canvas id="myChart1" width="300" height="300"></canvas>
+                                </div>
+                                <div class="chart-item">
+                                    <h3>Proportion of Basic Pay and Components</h3>
+                                    <canvas id="myChart3" width="300" height="300"></canvas>
+                                </div>
+                                <div class="chart-item">
+                                    <h3>Today's Salary Component Rules</h3>
+                                    <canvas id="myChart2" width="300" height="300"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- Results Table -->
+                <div class="mt-8 card overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead class="bg-bg-secondary">
+                                <tr>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        Staff ID</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        Name</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        Basic Pay</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        HRA</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        DA</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        TA</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        Gross Salary</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        PF</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        ESI</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        IT</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        Net Salary</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        Start Date</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        End Date</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        Department</th>
+                                </tr>
+                            </thead>
+                            <tbody id="analyticsBody" class="bg-white divide-y divide-border-color">
+                            </tbody>
+                        </table>
+                        <div id="paginationControls" class="flex justify-center items-center mt-4 gap-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pay Slip Approval Tab -->
+        <div id="paySlipApprovalTab" class="tab-content hidden">
+            <div class="card p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-primary">✅ Pay Slip Approval</h2>
+                    <div class="bg-accent text-white px-4 py-2 rounded-full text-sm font-semibold" id="pending">
+                        Pending:
+                    </div>
+                </div>
+
+                <div class="card overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full" id="payslips">
+                            <thead class="bg-bg-secondary">
+                                <tr>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        Staff ID</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        Name</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        Basic Pay</th>
+
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        HRA</th>
+
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        DA</th>
+
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        TA</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        Gross Salary</th>
+
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        PF</th>
+
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        ESI</th>
+
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        IT</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        Net Salary</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        Start Date</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        End Date</th>
+
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        Department</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-border-color" id="paySlipTBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end" id="paySlipApproval">
+                    <button class="btn-primary">Approve All</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Staff Management Tab -->
+        <div id="staffTab" class="tab-content hidden">
+            <div class="card p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-primary">👥 Staff Management</h2>
+                </div>
+
+                <div class="card overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full" id="tableId">
+                            <thead class="bg-bg-secondary">
+                                <tr>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        ID</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        Name</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        Email</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        Designation</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        Department</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        Basic Pay</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        Status</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        Relieving Date</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="staffTableBody" class="bg-white divide-y divide-border-color">
+                                <tr>
+                                    <td colspan="8" class="px-6 py-12 text-center text-text-secondary">
+                                        👥 No staff records found.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Salary Rules Tab -->
+        <div id="salaryComponentRulesTab" class="tab-content hidden">
+            <div class="card p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-primary">⚙️ Salary Component Rules</h2>
+                    <button onclick="openCalcFormModal()" class="btn-primary">+ Add New Rule</button>
+                </div>
+
+                <div id="salaryResults" class="card overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full" id="salaryTable">
+                            <thead class="bg-bg-secondary">
+                                <tr>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        Rule ID</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        Component</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        Type</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        Percentage</th>
+                                    <th
+                                        class="px-6 py-4 text-left text-xs font-semibold text-text-primary uppercase tracking-wider">
+                                        Effective Date</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-border-color" id="salaryTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modals would go here -->
+
+    <div id="addStaffModal"
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Staff Management</h3>
+                <div class="flex space-x-4 mt-4 border-b">
+                    <button class="tab-button px-4 py-2 border-b-2 font-medium text-gray-500 border-transparent"
+                        onclick="showTab('add')">Add Staff</button>
+                </div>
+            </div>
+
+            <div id="addTab" class="tab-content active p-6 space-y-4">
+
+                <form id="addStaffForm" class="p-6 space-y-4">
+                    <div>
+                        <label for="staffId" class="block text-sm font-medium text-gray-700 mb-1">Staff
+                            ID</label>
+                        <input type="text" id="staffId" name="staffId" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="staffName" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                        <input type="text" id="staffName" name="staffName" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="text" id="email" name="email" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="designation"
+                            class="block text-sm font-medium text-gray-700 mb-1">Designation</label>
+                        <input type="text" id="designation" name="designation" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="department" class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                        <input type="text" id="department" name="department" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="joiningDate" class="block text-sm font-medium text-gray-700 mb-1">Joining
+                            Date</label>
+                        <input type="date" id="joiningDate" name="joiningDate" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="basicPay" class="block text-sm font-medium text-gray-700 mb-1">Basic Pay
+                            (₹)</label>
+                        <input type="number" id="basicPay" name="basicPay" required min="0"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="statusEffectiveDates" class="block text-sm font-medium text-gray-700 mb-1">Status
+                            Effective Dates</label>
+                        <input type="date" id="statusEffectiveDates" name="statusEffectiveDates"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" onclick="closeAddStaffModal()"
+                            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition duration-200">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200">
+                            Add Staff
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="updateStaffModal"
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Staff Management</h3>
+                <div class="flex space-x-4 mt-4 border-b">
+                    <button class="tab-button px-4 py-2 border-b-2 font-medium text-gray-500 border-transparent"
+                        onclick="showTab('update')">Update Staff</button>
+                </div>
+            </div>
+
+            <div id="updateTab" class="tab-content active p-6 space-y-4">
+                <form id="updateStaffForm" class="p-6 space-y-4">
+                    <div>
+                        <label for="updateStaffId" class="block text-sm font-medium text-gray-700 mb-1">Staff ID</label>
+                        <input type="text" id="updateStaffId" name="staffId" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="updateStaffName" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                        <input type="text" id="updateStaffName" name="staffName"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="updateDesignation"
+                            class="block text-sm font-medium text-gray-700 mb-1">Designation</label>
+                        <input type="text" id="updateDesignation" name="designation" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="updateDepartment"
+                            class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                        <input type="text" id="updateDepartment" name="department" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="updateJoiningDate" class="block text-sm font-medium text-gray-700 mb-1">Joining
+                            Date</label>
+                        <input type="date" id="updateJoiningDate" name="joiningDate" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="updateBasicPay" class="block text-sm font-medium text-gray-700 mb-1">Basic Pay
+                            (₹)</label>
+                        <input type="number" id="updateBasicPay" name="basicPay" required min="0"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="updateStatusEffectiveDates"
+                            class="block text-sm font-medium text-gray-700 mb-1">Status
+                            Effective Dates</label>
+                        <input type="date" id="updateStatusEffectiveDates" name="statusEffectiveDates"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" onclick="closeUpdateStaffModal()"
+                            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition duration-200">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                            class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-200">
+                            Update Staff
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="calculationFormTab" class="tab-content p-6 space-y-4 hidden">
+        <div id="calcForm" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+            <form id="salaryForm"
+                class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto p-6 space-y-4">
+                <div>
+                    <label for="componentName" class="block text-sm font-medium text-gray-700 mb-1">Component
+                        Name</label>
+                    <input type="text" id="componentName" name="componentName" placeholder="e.g., DA, HRA, PF" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="componentType" class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                    <select id="componentType" name="componentType" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="ALLOWANCE">Allowance</option>
+                        <option value="DEDUCTION">Deduction</option>
+                    </select>
+                </div>
+                <!-- <div>
+                        <label for="valueType" class="block text-sm font-medium text-gray-700 mb-1">Value Type</label>
+                        <select id="valueType" name="valueType" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="percentage">Percentage</option>
+                            <option value="fixed">Fixed Amount</option>
+                        </select>
+                    </div> -->
+                <div>
+                    <label for="value" class="block text-sm font-medium text-gray-700 mb-1">Value</label>
+                    <input type="number" id="value" name="percentage" required min="0" step="0.01"
+                        placeholder="e.g., 15 or 1200"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="effectiveDate" class="block text-sm font-medium text-gray-700 mb-1">Effective
+                        Date</label>
+                    <input type="date" id="effectiveDate" name="effectiveDate" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" onclick="closeCalcFormModal()"
+                        class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition duration-200">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200">
+                        Add Rule
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        // Tab functionality
+        function showTab(tabName) {
+            // Hide all content
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.add('hidden'));
+
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab-button');
+            tabs.forEach(tab => tab.classList.remove('tab-active'));
+
+            // Show selected content
+            document.getElementById(tabName + 'Content').classList.remove('hidden');
+            document.getElementById(tabName + 'Content').classList.add('active');
+
+            // Add active class to selected tab
+            document.getElementById(tabName + 'Tab').classList.add('tab-active');
+        }
+
+        // Profile dropdown functionality
+        document.getElementById('profileToggle').addEventListener('click', function (e) {
+            e.stopPropagation();
+            const menu = document.getElementById('profileMenu');
+            menu.classList.toggle('hidden');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function () {
+            document.getElementById('profileMenu').classList.add('hidden');
+        });
+
+        // Report generation functions
+    </script>
+    <script src="../scripts/lastScript.js"></script>
+    <script src="../scripts/adminScript.js"></script>
+</body>
+
+</html>

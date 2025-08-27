@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Salary Acquittance Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-light': '#3b82f6',
+                        'accent': '#fb923c', // Orange  
+                        'accent-dark': '#ea580c',
+                        'danger': '#dc2626', // Red
+                        'danger-light': '#ef4444',
+                        'bg-primary': '#f8fafc',
+                        'bg-secondary': '#f1f5f9',
+                        'text-primary': '#1e293b',
+                        'text-secondary': '#64748b',
+                        'border-color': '#e2e8f0'
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .gradient-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        }
+
+        .gradient-accent {
+            background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+        }
+
+        .gradient-danger {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+        }
+
+        .tab-active {
+            color: #1e3a8a;
+            border-bottom: 2px solid #1e3a8a;
+        }
+
+        .table-hover:hover {
+            background-color: #f8fafc;
+        }
+
+        .shadow-elegant {
+            box-shadow: 0 10px 30px -10px rgba(30, 58, 138, 0.3);
+        }
+
+        .transition-smooth {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.4);
+        }
+
+        .btn-accent {
+            background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-accent:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(251, 146, 60, 0.4);
+        }
+
+        .card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+
+        .select-field {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .select-field:focus {
+            outline: none;
+            border-color: #1e3a8a;
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .active {
+            display: block;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-primary shadow-elegant">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <h1 class="text-2xl font-bold text-white">
+                    🛡️ HR Dashboard
+                </h1>
+
+                <div class="relative">
+                    <button id="profileToggle"
+                        class="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-smooth">
+                        <div class="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
+                            <span class="text-sm font-semibold" id="profileImage">A</span>
+                        </div>
+                        <span class="hidden md:inline font-medium" id="profileName"></span>
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
+
+                    <div id="profileMenu" class="hidden absolute right-0 mt-3 w-48 card z-50">
+                        <div class="py-2">
+                            <a href="" id="profileLink"
+                                class="flex items-center gap-3 px-4 py-3 text-sm text-text-primary hover:bg-bg-secondary transition-smooth">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zM4 20c0-4 4-6 8-6s8 2 8 6v1H4v-1z" />
+                                </svg>
+                                Profile
+                            </a>
+                            <hr class="my-1 border-border-color">
+                            <button id="logoutBtn"
+                                class="w-full text-left px-4 py-3 text-sm text-danger hover:bg-red-50 transition-smooth">
+                                🚪 Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="bg-white border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex space-x-8">
+                <button onclick="showTab('staff')" id="staffButton"
+                    class="tab-button py-4 px-1 border-b-2 border-blue-500 text-blue-600 hover:text-gray-700 font-medium">
+                    Add Or Update Staff
+                </button>
+                <button onclick="showTab('calculationForm')" id="calculationFormButton"
+                    class="tab-button py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium">
+                    Salary Components
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Salary Calculator Tab -->
+        <div id="calculationFormTab" class="tab-content p-6 space-y-4 hidden">
+
+            <div id="calcForm"
+                class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-50">
+                <form id="salaryForm"
+                    class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto p-6 space-y-4">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Add Salary Rule</h3>
+                    <div>
+                        <label for="componentName" class="block text-sm font-medium text-gray-700 mb-1">Component
+                            Name</label>
+                        <input type="text" id="componentName" name="componentName" placeholder="e.g., DA, HRA, PF"
+                            required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="componentType" class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                        <select id="componentType" name="componentType" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="ALLOWANCE">Allowance</option>
+                            <option value="DEDUCTION">Deduction</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="value" class="block text-sm font-medium text-gray-700 mb-1">Percentage (%)</label>
+                        <input type="number" id="value" name="percentage" required min="0" step="0.01"
+                            placeholder="e.g., 15 or 12"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="effectiveDate" class="block text-sm font-medium text-gray-700 mb-1">Effective
+                            Date</label>
+                        <input type="date" id="effectiveDate" name="effectiveDate" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" onclick="closeCalcFormModal()"
+                            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition duration-200">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200">
+                            Add Rule
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="salaryResults">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rule Name
+                                </th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rule Type
+                                </th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Percentage
+                                </th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Effective
+                                    Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salaryTableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Salary data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="staffTab" class="tab-content">
+            <div class="bg-white rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                    <h2 class="text-lg font-medium text-gray-900">Staff Management</h2>
+                    <button onclick="openAddStaffModal()"
+                        class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-200">
+                        Add Staff
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200" id="tableId">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    ID</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Name</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Email</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Designation</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Department</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Joining Date</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Basic Pay</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Effective Dates</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="staffTableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Staff data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Staff Modal -->
+    <div id="addStaffModal"
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Add New Staff</h3>
+            </div>
+
+            <div class="p-6 space-y-4">
+                <form id="addStaffForm" class="space-y-4">
+                    <div>
+                        <label for="staffId" class="block text-sm font-medium text-gray-700 mb-1">Staff ID</label>
+                        <input type="text" id="staffId" name="staffId" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="staffName" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                        <input type="text" id="staffName" name="staffName" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" id="email" name="email" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="designation"
+                            class="block text-sm font-medium text-gray-700 mb-1">Designation</label>
+                        <input type="text" id="designation" name="designation" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="department" class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                        <input type="text" id="department" name="department" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="joiningDate" class="block text-sm font-medium text-gray-700 mb-1">Joining
+                            Date</label>
+                        <input type="date" id="joiningDate" name="joiningDate" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="basicPay" class="block text-sm font-medium text-gray-700 mb-1">Basic Pay (₹)</label>
+                        <input type="number" id="basicPay" name="basicPay" required min="0"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="bankDetails" class="block text-sm font-medium text-gray-700 mb-1">Bank
+                            Details</label>
+                        <input type="text" id="bankDetails" name="bankDetails" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="statusEffectiveDates" class="block text-sm font-medium text-gray-700 mb-1">Status
+                            Effective Dates</label>
+                        <input type="date" id="statusEffectiveDates" name="statusEffectiveDates"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" onclick="closeAddStaffModal()"
+                            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition duration-200">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200">
+                            Add Staff
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Staff Modal -->
+    <div id="updateStaffModal"
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Update Staff</h3>
+            </div>
+
+            <div class="p-6 space-y-4">
+                <form id="updateStaffForm" class="space-y-4">
+                    <div>
+                        <label for="updateStaffId" class="block text-sm font-medium text-gray-700 mb-1">Staff ID</label>
+                        <input type="text" id="updateStaffId" name="staffId" required readonly
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="updateStaffName" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                        <input type="text" id="updateStaffName" name="staffName"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="updateEmail" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" id="updateEmail" name="email"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="updateDesignation"
+                            class="block text-sm font-medium text-gray-700 mb-1">Designation</label>
+                        <input type="text" id="updateDesignation" name="designation" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="updateDepartment"
+                            class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                        <input type="text" id="updateDepartment" name="department" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="updateJoiningDate" class="block text-sm font-medium text-gray-700 mb-1">Joining
+                            Date</label>
+                        <input type="date" id="updateJoiningDate" name="joiningDate" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="updateBasicPay" class="block text-sm font-medium text-gray-700 mb-1">Basic Pay
+                            (₹)</label>
+                        <input type="number" id="updateBasicPay" name="basicPay" required min="0"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="updateBankDetails" class="block text-sm font-medium text-gray-700 mb-1">Bank
+                            Details</label>
+                        <input type="text" id="updateBankDetails" name="bankDetails" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="updateStatusEffectiveDates"
+                            class="block text-sm font-medium text-gray-700 mb-1">Status Effective Dates</label>
+                        <input type="date" id="updateStatusEffectiveDates" name="statusEffectiveDates"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" onclick="closeUpdateStaffModal()"
+                            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition duration-200">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                            class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-200">
+                            Update Staff
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="addStaffModal"
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Staff Management</h3>
+                <div class="flex space-x-4 mt-4 border-b">
+                    <button class="tab-button px-4 py-2 border-b-2 font-medium text-gray-500 border-transparent"
+                        onclick="showTab('add')">Add Staff</button>
+                </div>
+            </div>
+
+            <div id="addTab" class="tab-content active p-6 space-y-4">
+
+                <form id="addStaffForm" class="p-6 space-y-4">
+                    <div>
+                        <label for="staffId" class="block text-sm font-medium text-gray-700 mb-1">Staff
+                            ID</label>
+                        <input type="text" id="staffId" name="staffId" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="staffName" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                        <input type="text" id="staffName" name="staffName" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="text" id="email" name="email" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="designation"
+                            class="block text-sm font-medium text-gray-700 mb-1">Designation</label>
+                        <input type="text" id="designation" name="designation" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="department" class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                        <input type="text" id="department" name="department" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="joiningDate" class="block text-sm font-medium text-gray-700 mb-1">Joining
+                            Date</label>
+                        <input type="date" id="joiningDate" name="joiningDate" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="basicPay" class="block text-sm font-medium text-gray-700 mb-1">Basic Pay
+                            (₹)</label>
+                        <input type="number" id="basicPay" name="basicPay" required min="0"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="BankDetails" class="block text-sm font-medium text-gray-700 mb-1">Bank Details
+                            (₹)</label>
+                        <input type="text" id="BankDetails" name="BankDetails" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="statusEffectiveDates" class="block text-sm font-medium text-gray-700 mb-1">Status
+                            Effective Dates</label>
+                        <input type="date" id="statusEffectiveDates" name="statusEffectiveDates"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" onclick="closeAddStaffModal()"
+                            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition duration-200">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200">
+                            Add Staff
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="updateStaffModal"
+        class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Staff Management</h3>
+                <div class="flex space-x-4 mt-4 border-b">
+                    <button class="tab-button px-4 py-2 border-b-2 font-medium text-gray-500 border-transparent"
+                        onclick="showTab('update')">Update Staff</button>
+                </div>
+            </div>
+
+            <div id="updateTab" class="tab-content active p-6 space-y-4">
+                <form id="updateStaffForm" class="p-6 space-y-4">
+                    <div>
+                        <label for="updateStaffId" class="block text-sm font-medium text-gray-700 mb-1">Staff ID</label>
+                        <input type="text" id="updateStaffId" name="staffId" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="updateStaffName" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                        <input type="text" id="updateStaffName" name="staffName"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="updateDesignation"
+                            class="block text-sm font-medium text-gray-700 mb-1">Designation</label>
+                        <input type="text" id="updateDesignation" name="designation" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="updateDepartment"
+                            class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                        <input type="text" id="updateDepartment" name="department" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="updateJoiningDate" class="block text-sm font-medium text-gray-700 mb-1">Joining
+                            Date</label>
+                        <input type="date" id="updateJoiningDate" name="joiningDate" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="updateBasicPay" class="block text-sm font-medium text-gray-700 mb-1">Basic Pay
+                            (₹)</label>
+                        <input type="number" id="updateBasicPay" name="basicPay" required min="0"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label for="UpdateBankDetails" class="block text-sm font-medium text-gray-700 mb-1">Bank Details
+                            (₹)</label>
+                        <input type="text" id="UpdateBankDetails" name="BankDetails" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="updateStatusEffectiveDates"
+                            class="block text-sm font-medium text-gray-700 mb-1">Status
+                            Effective Dates</label>
+                        <input type="date" id="updateStatusEffectiveDates" name="statusEffectiveDates"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" onclick="closeUpdateStaffModal()"
+                            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition duration-200">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                            class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-200">
+                            Update Staff
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="../scripts/lastScript.js"></script>
+    <script src="../scripts/hrScript.js"></script>
+</body>
